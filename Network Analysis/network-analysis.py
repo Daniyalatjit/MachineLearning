@@ -35,6 +35,7 @@ nx.draw_networkx(G)
 # This dataset consists of a network representating friendship between Facebook users.
 # The Facebook data has been anonymized by replacing the internal Facebook identifiers
 # for each user with a new value
+# Visit http://snap.stanford.edu/data/ for more information about the dataset
 
 # let us load and extract some basic information from the graph./
 fb = nx.read_adjlist("facebook_combined.txt")
@@ -45,4 +46,20 @@ print('Edges: ', fb_k)
 print('Average Degree: ', int(fb_avg_deg))
 degrees = [v for k, v in fb.degree() ]
 degree_hist = plt.hist(degrees, 100)
-plt.plot(degree_hist[0], degree_hist[1])
+
+# In the graph I can see that Facebook network is a scale-free network
+print('Connected Componets: ', nx.number_connected_components(fb))
+
+# As the number of components in the Facebook Network is one hence it represents a connected 
+# graph
+# To find communities I will prune the graph by removing some of the nodes from the graph
+
+fb_pruned = nx.read_adjlist("facebook_combined.txt")
+fb_pruned.remove_node('0')
+print('Remaining Nodes: ', fb_pruned.number_of_nodes())
+print('Number of Connected Components: ', nx.number_connected_components(fb_pruned))
+
+# Here are 19 communites in the network
+# Sizes of the connected components
+fb_components = nx.connected_components(fb_pruned)
+print('Size of the connected components: ', [len(c) for c in fb_components])
