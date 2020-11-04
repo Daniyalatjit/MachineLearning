@@ -11,6 +11,8 @@
 # of complex networks.
 import networkx as nx
 import matplotlib.pyplot as plt
+from networkx.algorithms import centrality
+from networkx.generators.small import make_small_undirected_graph
 
 # Basic use of NetwrokX
 # I'm creating a graph as follows:
@@ -78,3 +80,9 @@ print('Size of the connected components: ', [len(c) for c in fb_components])
 # 4-    Eigenvector Centrality
 # read more in the document....
 
+degree_cnet_fb = nx.degree_centrality(fb)
+print('Facebook degree centrality: ', sorted( degree_cnet_fb.items(), 
+                                    key= lambda x: x[1],
+                                    reverse= True)[:10])
+degree_hist = plt.hist(list(degree_cnet_fb.values()), 100)
+plt.loglog(degree_hist[1][1:], degree_hist[0], 'b', marker= 'o')
