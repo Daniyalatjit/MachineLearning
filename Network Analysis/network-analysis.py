@@ -63,3 +63,18 @@ print('Number of Connected Components: ', nx.number_connected_components(fb_prun
 # Sizes of the connected components
 fb_components = nx.connected_components(fb_pruned)
 print('Size of the connected components: ', [len(c) for c in fb_components])
+
+
+# Now the next thing I will anayze is centrality of nodes in the network.
+# Centrality of a node measures its relative importance within the graph.
+# The central nodes are probable more influential, have grater access to information
+# , and can communicate their opinions more efficiently. By analyzing the centrality 
+# of a node in social network we can determine which person is more influential, 
+# most informed and most communicative.
+# There are for best-known measures of centrality:
+# 1-    Degree Centrality
+# 2-    Betweeness Centrality
+# 3-    Closness Centrality
+# 4-    Eigenvector Centrality
+# read more in the document....
+
