@@ -15,6 +15,7 @@ from networkx.algorithms import centrality
 from networkx.algorithms.centrality import betweenness
 from networkx.algorithms.centrality import closeness
 from networkx.algorithms.centrality import eigenvector
+from networkx.algorithms.centrality import current_flow_betweenness
 from networkx.generators.geometric import thresholded_random_geometric_graph
 from networkx.generators.small import make_small_undirected_graph
 
@@ -116,6 +117,8 @@ plt.loglog(degree_hist[1][1:], degree_hist[0], 'b', marker= 'o')
 def trim_by_degree_centrality(graph, degree = 0.01):
     gr = graph.copy()
     d = nx.degree_centrality(gr)
+    # I have converted dict to list because dict elements can not be removed 
+    # in an iterator.
     for n in list(gr.nodes()):
         if d[n] <= degree:
             gr.remove_node(n)
@@ -125,3 +128,36 @@ degree_centrality_threshold = 21.0/(fb.order()-1.0)
 print('Degree Centrality Threshold: ', degree_centrality_threshold)
 fb_trimmed = trim_by_degree_centrality(fb, degree=degree_centrality_threshold)
 print('Remaing Number of Nodes: ', len(fb_trimmed))
+
+# I've reduced the graph from 4,039 to 2,226
+# now I will compute the current flow betweenness cetrality in the trimmed graph.
+# trimmed graph is not connected but current flow betwenness cemtrality needs connected graph.
+# Here I will find the connected subgraphs in the trimmed graph.
+
+# fb_subgraph = list(nx.connected_component_subgraphs(fb_trimmed))
+
+# Note: connected_component_subgraphs functions has been deprecated with version 2.1, and finally removed with version 2.4.
+
+# print("Number of Subgraphs Found: ", len(fb_subgraph))
+# print("Number of Nodes in the 0th Subgraph: ", len(fb_subgraph[0]))
+# betweenness = nx.betweenness_centrality(fb_subgraph[0])
+# print("Trimmed FB Betweenness: ", sorted(betweenness.items(), 
+#                                 key=lambda x: x[1],
+#                                 reverse=True)[:10])
+# current_flow = nx.current_flow_betweenness_centrality(fb_subgraph[0])
+# print('Trimmed FB Subgraph Current Flow Betweenness Cetrality: ', sorted(current_flow.items(),
+#                                                                 key= lambda x: x[1],
+#                                                                 reverse=True)[:10])
+
+# Now I will visulaize the centralities on Graphs for understanding and using the analysis
+# there are several way to visulaize the network:
+# random_layout
+# spring_layout etc
+# I using the spring layout for better understandability
+
+pos_fb = nx.spring_layout(fb, iterations = 1000)
+nsize=  nx.array([ v for v in degree_cnet_fb.values() ])
+nsize = 500*(nsize - min(nsize))/(max(nsize) - min(nsize))
+nodes = nx.draw_networkx_nodes(fb, pos=pos_fb,
+                                node_size=nsize)
+edges = nx.draw_networkx_edges(fb, pos=pos_fb, alpha=.1)
