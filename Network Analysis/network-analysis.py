@@ -16,8 +16,10 @@ from networkx.algorithms.centrality import betweenness
 from networkx.algorithms.centrality import closeness
 from networkx.algorithms.centrality import eigenvector
 from networkx.algorithms.centrality import current_flow_betweenness
+from networkx.algorithms.centrality.closeness import closeness_centrality
 from networkx.generators.geometric import thresholded_random_geometric_graph
 from networkx.generators.small import make_small_undirected_graph
+import numpy as np
 
 # Basic use of NetwrokX
 # I'm creating a graph as follows:
@@ -95,9 +97,9 @@ plt.loglog(degree_hist[1][1:], degree_hist[0], 'b', marker= 'o')
 
 # Betweenness, Closeness and Eigenvector Centrality
 # Note this part may take a while to be executed depending on your systems speed.
-# betweenness_fb = nx.betweenness_centrality(fb)
-# closeness_fb = nx.closeness_centrality(fb)
-# eigenvector_fb = nx.eigenvector_centrality(fb)
+betweenness_fb = nx.betweenness_centrality(fb)
+closeness_fb = nx.closeness_centrality(fb)
+eigenvector_fb = nx.eigenvector_centrality(fb)
 # print("Betweenness Centrality: ", sorted(betweenness_fb.items(),
 #                                     key= lambda x:x[1],
 #                                     reverse=True)[:10])
@@ -156,7 +158,27 @@ print('Remaing Number of Nodes: ', len(fb_trimmed))
 # I using the spring layout for better understandability
 
 pos_fb = nx.spring_layout(fb, iterations = 1000)
-nsize=  nx.array([ v for v in degree_cnet_fb.values() ])
+nsize=  np.array([ v for v in degree_cnet_fb.values() ])
+nsize = 500*(nsize - min(nsize))/(max(nsize) - min(nsize))
+nodes = nx.draw_networkx_nodes(fb, pos=pos_fb,
+                                node_size=nsize)
+edges = nx.draw_networkx_edges(fb, pos=pos_fb, alpha=.1)
+
+# Changing the centrality measure to closeness centrality and eigenvector centrality, I found
+# different spring_layout graph but mostly similar. 
+nsize=  np.array([ v for v in closeness_centrality.values() ])
+nsize = 500*(nsize - min(nsize))/(max(nsize) - min(nsize))
+nodes = nx.draw_networkx_nodes(fb, pos=pos_fb,
+                                node_size=nsize)
+edges = nx.draw_networkx_edges(fb, pos=pos_fb, alpha=.1)
+
+nsize=  np.array([ v for v in eigenvector_fb.values() ])
+nsize = 500*(nsize - min(nsize))/(max(nsize) - min(nsize))
+nodes = nx.draw_networkx_nodes(fb, pos=pos_fb,
+                                node_size=nsize)
+edges = nx.draw_networkx_edges(fb, pos=pos_fb, alpha=.1)
+
+nsize=  np.array([ v for v in closeness_fb.values() ])
 nsize = 500*(nsize - min(nsize))/(max(nsize) - min(nsize))
 nodes = nx.draw_networkx_nodes(fb, pos=pos_fb,
                                 node_size=nsize)
