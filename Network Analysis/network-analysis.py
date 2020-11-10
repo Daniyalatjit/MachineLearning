@@ -203,4 +203,138 @@ nodes = nx.draw_networkx_nodes(fb,
 edges = nx.draw_networkx_edges(fb,
                                pos = pos_fb,
                                alpha = 0.1)
-                               
+
+# Ego Networks
+# Ego networks are subnetworks of neighbors that are centered on a certain node. In Facebook and Linkedin
+# these are described as "your network". Every node in a network has its own ego network and can only access
+# the ndeos in it. All ego-networks interlock to form the whole social network.
+
+ego_107 = nx.ego_graph(fb, '107')
+print('Number of nodes in ego graph 107: ', len(ego_107))
+print('Number of nodes in ego graph having radious up to 2: ', 
+      len(nx.ego_graph(fb, '107', radius=2 )))
+
+# The ego network of node 107 has 1,046 nodes while when I expand its radius upto 2 then it can reach more nodes
+# (2,687), which is a quite lasrge network having half of the nodes of whole network. 
+
+# The dataset we are using in this notebook provides the previously labeled ego-networks, I will compute the 
+# actual size of the ego-network following the user labeling.
+
+ego_id = 107
+net_107 = nx.read_edgelist(
+    os.path.join('/content/drive/My Drive/Machine Learning/facebook', '{0}.edges'.format(ego_id)),
+    nodetype = int
+)
+
+print('Nodes of the ego graph 107: ', len(net_107))
+
+# I will try to understand the structure of the Facebook Network by comparing the 10 different ego-networks 
+# among them.
+# I will compute the number of edges in every ego network then will compare and choose the most dense ego network.
+
+from numpy import zeros
+ego_ids = (0, 107, 348, 414, 686, 698, 1684, 3980, 1912, 3437)
+ego_sizes = zeros((10,1))
+i = 0
+
+for id in ego_ids:
+  grp = nx.read_edgelist(
+      os.path.join('/content/drive/My Drive/Machine Learning/facebook', '{0}.edges'.format(id)),
+      nodetype = int
+  )
+  ego_sizes[i] = grp.size()
+  i=i+1
+[i_max, j] = (ego_sizes == ego_sizes.max()).nonzero()
+ego_max = np.array(ego_ids)[i_max]
+print('The most dense ego network is: ', ego_max[0])
+G = nx.read_edgelist(
+    os.path.join('/content/drive/My Drive/Machine Learning/facebook', '{0}.edges'.format(ego_max[0])),
+    nodetype = int
+)
+
+print('Nodes: ', G.order())
+print('Edges: ', G.size())
+print('Average Degree: ', int(G.size()/G.order()))
+
+# Now I will compute that how many intesections exists between the ego-network in the Facebook Network. To do this, I 
+# will add a field ego_net for every node and store an array with ego-networks the node belongs to. Then having length 
+# of these arrays, I will be able to compute the number of nodes that belongs to 1, 2, 3, 4 amd more than 4 ego-networks.
+
+for i in fb.nodes() :
+  fb.nodes[str(i)]['egonet'] = []
+
+for id in ego_ids:
+  G = nx.read_edgelist(
+      os.path.join('/content/drive/My Drive/Machine Learning/facebook', 
+                   '{0}.edges'.format(id)),
+                   nodetype = int
+  )
+  print(id)
+  for n in G.nodes() :
+    if (fb.nodes[str(n)]['egonet'] == []) :
+      fb.nodes[str(n)]['egonet'] = [id]
+    else :
+      fb.nodes[str(n)]['egonet'].append(id)
+
+# Computing the intersections
+intersects = [len(x['egonet']) for x in fb.nodes.values() ]
+print('Number of node into 0 ego-network:', sum(np.equal(intersects, 0)))
+print('Number of node into 1 ego-network:', sum(np.equal(intersects, 1)))
+print('Number of node into 2 ego-network:', sum(np.equal(intersects, 2)))
+print('Number of node into 3 ego-network:', sum(np.equal(intersects, 3)))
+print('Number of node into 4 ego-network:', sum(np.equal(intersects, 4)))
+print('Number of nodes into more than 4 ego-network:', sum(np.greater(intersects, 4)))
+
+# Now, I will visualize the different ego-networks using different colors so that different communities in the 
+# network could be identified.
+
+for i in fb.nodes():
+  fb.nodes[str(i)]['egocolor'] = 0
+
+idColor = 1
+for id in ego_ids:
+  G = nx.read_edgelist(
+      os.path.join('/content/drive/My Drive/Machine Learning/facebook', 
+                   '{0}.edges'.format(id)),
+                   nodetype = int)
+  for n in G.nodes():
+    fb.nodes[str(n)]['egocolor'] = idColor
+    idColor += 1
+  
+  colors = [x['egocolor'] for x in fb.nodes.values() ]
+  nsize = np.array([v for v in degree_cent_fb.values() ])
+  nsize = 500*(nsize - min(nsize))/(max(nsize) - min(nsize))
+  nodes = nx.draw_networkx_nodes(
+      fb, pos = pos_fb,
+      cmap = plt.get_cmap('Paired'),
+      node_color = colors,
+      node_size = nsize
+  )
+  edges = nx.draw_networkx_edges(fb, pos=pos_fb, alpha=.1)
+
+# Community Detection
+# A community in a network is the set of nodes of the network that is densely connected internally.
+# I will use Community toolbox for implementing Louvain Method for community detection. 
+
+import community
+partition = community.best_partition(fb)
+print('Number of communities found: ', max(partition.values()))
+colors2 = [partition.get(node) for node in fb.nodes()]
+nsize = np.array([v for v in degree_cent_fb.values() ])
+nsize = 500*(nsize - min(nsize))/ (max(nsize) - min(nsize))
+nodes = nx.draw_networkx_nodes(fb,
+                               pos = pos_fb,
+                               cmap = plt.get_cmap('Paired'),
+                               node_color = colors2,
+                               node_size = nsize)
+edges = nx.draw_networkx_edges(fb, pos=pos_fb, alpha=0.1)
+
+# Conclusion
+# In this notebook I used Python toolbox, NetworkX which a useful tool for network anlysis. I'm intoduced 
+# to some of the basic concepts in social network analysis susch as, Centrality Measures which identifies 
+# the importance of a node in the network or community or ego-network, allows to study the reach of the 
+# information a node can transmit or have access to. 
+
+# I tried to resolve several issues, such as finding the most representative members of the network in 
+# terms of the most "connected", the most "circulated" and the "closest" or the most "accessible" nodes to 
+# the others. 
