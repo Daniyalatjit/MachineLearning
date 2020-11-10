@@ -20,6 +20,7 @@ from networkx.algorithms.centrality.closeness import closeness_centrality
 from networkx.generators.geometric import thresholded_random_geometric_graph
 from networkx.generators.small import make_small_undirected_graph
 import numpy as np
+import os
 
 # Basic use of NetwrokX
 # I'm creating a graph as follows:
