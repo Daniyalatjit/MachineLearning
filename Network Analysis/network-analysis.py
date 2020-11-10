@@ -183,3 +183,24 @@ nsize = 500*(nsize - min(nsize))/(max(nsize) - min(nsize))
 nodes = nx.draw_networkx_nodes(fb, pos=pos_fb,
                                 node_size=nsize)
 edges = nx.draw_networkx_edges(fb, pos=pos_fb, alpha=.1)
+
+# **Page Rank**
+# PageRank is an Algorithm invented by Larry Page and Sergey Brin, and bacame a Google trademark in 1998.
+# PageRank Algorithm is used to rate pages objectively and effectively.
+# If we consider a node as a webpage then then hyperlink to the page counts as a vote of support and a page has high rank. If the sum of the ranks of its incoming edges is high then the PageRank is high.
+
+# The PageRank algorithm is described froma probabilistic point of view. 
+# If we consider that one node has n edges to n nodes then we can say that the probabiltiy of going to anyone of the page is 1/n (initially).
+# Then we calculate the probablity again using  the formula: PR = Sum(Old PR of incomming i(th) node/outgoing edges of incoming i(th) node)
+# After few iteration, the page having higher probablity value get higher rank.
+
+pr = nx.pagerank(fb, alpha = 0.85)
+nsize = np.array([ v for v in pr.values() ])
+nsize = 500*(nsize - min(nsize)) / (max(nsize) - min(nsize))
+nodes = nx.draw_networkx_nodes(fb,
+                               pos = pos_fb,
+                               node_size = nsize)
+edges = nx.draw_networkx_edges(fb,
+                               pos = pos_fb,
+                               alpha = 0.1)
+                               
